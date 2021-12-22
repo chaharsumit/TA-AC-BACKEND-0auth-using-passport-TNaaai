@@ -8,7 +8,7 @@ passport.use(new GithubStrategy({
   clientSecret: process.env.CLIENT_SECRET,
   callbackURL: '/auth/github/callback'
 }, (accessToken, refreshToken, profile, done) => {
-  var profileData = {
+  let profileData = {
     name: profile.displayName,
     username: profile.username,
     email: profile._json.email,
@@ -36,7 +36,25 @@ passport.use(new GoogleStrategy({
   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
   callbackURL: '/auth/google/callback'
 }, (accessToken, refreshToken, profile, done) => {
-  console.log(profile);
+  let profileData = {
+    name: profile.displayName,
+    username: profile.username,
+  }
+  User.findOne({ name: profile.displayName }, (err, user) => {
+    if(err){
+      return done(err);
+    }
+    if(!user){
+      User.create(profileData, (err, newUser) => {
+        if(err){
+          return done(err);
+        }
+        return done(null, newUser);
+      })
+    }else{
+      return done(null, user);
+    }
+  })
 }))
 
 passport.serializeUser((user, done) => {
