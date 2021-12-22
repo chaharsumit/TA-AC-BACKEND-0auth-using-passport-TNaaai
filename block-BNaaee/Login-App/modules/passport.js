@@ -1,7 +1,9 @@
 let passport = require('passport');
 let GithubStrategy = require('passport-github').Strategy;
 let GoogleStrategy = require('passport-google-oauth20').Strategy;
+let LocalStrategy = require('passport-local').Strategy;
 let User = require('../models/User');
+let Admin = require('../models/Admin');
 
 
 passport.use(new GithubStrategy({
@@ -57,6 +59,17 @@ passport.use(new GoogleStrategy({
     }
   })
 }))
+
+passport.use(new LocalStrategy(
+  function(username, password, done) {
+    Admin.findOne({ email: email }, (err, admin) =>{
+      if (err) { return done(err); }
+      if (!admin) { return done(null, false); }
+      if (!admin.verifyPassword(password)) { return done(null, false); }
+      return done(null, admin);
+    });
+  }
+));
 
 passport.serializeUser((user, done) => {
   done(null, user.id);
