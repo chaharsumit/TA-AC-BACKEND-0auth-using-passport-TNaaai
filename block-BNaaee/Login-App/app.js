@@ -18,6 +18,8 @@ mongoose.connect("mongodb://localhost/sampleLogin", (err) => {
   console.log(err ? err : "Database is connected successfully");
 })
 
+require('./modules/passport');
+
 var app = express();
 
 // view engine setup
@@ -35,6 +37,9 @@ app.use(session({
   resave: false,
   store: new MongoStore({ mongoUrl: "mongodb://localhost/sampleLogin" })
 }))
+
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
